@@ -24,10 +24,6 @@
                                     <action selector="onClickAddVideo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Z1s-Sd-bwx"/>
                                 </connections>
                             </button>
-                            <pickerView contentMode="scaleToFill" semanticContentAttribute="forceLeftToRight" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oyE-nw-W4j">
-                                <rect key="frame" x="0.0" y="594" width="393" height="162"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
-                            </pickerView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="k5x-38-Ll0">
                                 <rect key="frame" x="76" y="139" width="240" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
