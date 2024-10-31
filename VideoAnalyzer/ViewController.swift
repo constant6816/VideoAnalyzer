@@ -8,6 +8,7 @@
 import UIKit
 import AVFoundation
 import PhotosUI
+import Combine
 
 class ViewController: UIViewController {
     
@@ -18,7 +19,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
     }
-
+    
     @IBAction func onClickAddVideo(_ sender: Any) {
         var configuration = PHPickerConfiguration()
         configuration.filter = .videos
@@ -27,14 +28,12 @@ class ViewController: UIViewController {
         present(pickerViewController, animated: true, completion: nil)
     }
     
-    func temp() {
-        guard let avAsset = avAsset else { return }
-        Task {
-            print(try? await avAsset.load(.duration))
-        }
+    private func initializeVideo(url: URL) async throws {
+        avAsset = AVURLAsset(url: url)
         
-        let status = avAsset.status(of: .duration)
-        print(status)
+        let (duration, track) = try await avAsset!.load(.duration, .tracks)
+        print(duration)
+        print(track)
     }
 }
 
@@ -55,12 +54,20 @@ extension ViewController: PHPickerViewControllerDelegate {
         
         if itemProvider.hasItemConformingToTypeIdentifier(typeIdentifier) {
             itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier, completionHandler: { [weak self] (url, error) in
-                guard let url = url else { return }
-                self?.avAsset = AVURLAsset(url: url)
-                self?.temp()
+                guard let url = url, let self = self else { return }
+                Task {
+                    do {
+                        try await self.initializeVideo(url: url)
+                    } catch {
+                        print("\(error)")
+                    }
+                }
             })
+            
+            
             
         }
         
     }
 }
+
