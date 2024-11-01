@@ -55,17 +55,40 @@ extension ViewController: PHPickerViewControllerDelegate {
         if itemProvider.hasItemConformingToTypeIdentifier(typeIdentifier) {
             itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier, completionHandler: { [weak self] (url, error) in
                 guard let url = url, let self = self else { return }
-                Task {
-                    do {
-                        try await self.initializeVideo(url: url)
-                    } catch {
-                        print("\(error)")
+                avAsset = AVURLAsset(url: url)
+                
+//                avAsset
+                let imageGenerator = AVAssetImageGenerator(asset: avAsset!)
+                imageGenerator.appliesPreferredTrackTransform = true
+                imageGenerator.requestedTimeToleranceBefore = .zero
+                imageGenerator.requestedTimeToleranceAfter = .zero
+                // 썸네일을 얻고 싶은 시간 설정 (여기서는 첫 번째 프레임)
+                let time = CMTime(value: 3, timescale: 1)
+
+                do {
+                    // 썸네일 이미지 얻기
+                    print(time)
+                    let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+
+
+                    // CGImage를 UIImage로 변환
+                    let thumbnail = UIImage(cgImage: cgImage)
+                    
+                    // 완료 클로저 호출
+                    // return thumbnail.rotateImageIfNeeded()
+                    DispatchQueue.main.async {
+                        self.ivTest.image = thumbnail
                     }
+                    
+                } catch {
+                    
                 }
+                
+//                Task {
+//                    let duration = try await self.avAsset?.load(.duration)
+//                    print(duration)
+//                }
             })
-            
-            
-            
         }
         
     }

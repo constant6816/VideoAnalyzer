@@ -10,15 +10,19 @@ import AVFoundation
 import Combine
 
 extension AVURLAsset {
-    public func requestStatus<T>(_ property: AVAsyncProperty<AVURLAsset, T>) -> Future<AVAsyncProperty<AVURLAsset, T>.Status, Error> {
-        return Future() { promise in
-            let status = self.status(of: property)
-            switch status {
-            case .notYetLoaded,.loading, .failed(_):
-                return promise(Result.failure(<#any Error#>))
-            case .loaded(_):
-                return promise(Result.success(status))
-            }
-        }
-    }
+//    
+//    public func requestStatus<T>(_ property: AVAsyncProperty<AVURLAsset, T>) -> Future<AVAsyncProperty<AVURLAsset, T>.Status, Error> {
+//        let status: CurrentValueSubject = CurrentValueSubject<AVAsyncProperty<AVURLAsset, T>.Status, Never>(self.status(of: property))
+//        status.sink(receiveValue: { value in
+//            switch value {
+//            case .loaded(_):
+//                return Future<AVAsyncProperty<AVURLAsset, T>.Status, Never>() { promise in
+//                    promise(Result.success(value))
+//                }
+//            case .notYetLoaded, .loading, .failed(_):
+//                break
+//            }
+//        })
+//        return
+//    }
 }
