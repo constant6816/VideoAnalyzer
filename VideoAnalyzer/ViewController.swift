@@ -28,69 +28,66 @@ class ViewController: UIViewController {
         present(pickerViewController, animated: true, completion: nil)
     }
     
-    private func initializeVideo(url: URL) async throws {
-        avAsset = AVURLAsset(url: url)
-        
-        let (duration, track) = try await avAsset!.load(.duration, .tracks)
-        print(duration)
-        print(track)
-    }
+//    private func importVideo(itemProvider: NSItemProvider, typeIdentifier: String) async {
+//        itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier, completionHandler: { [weak self] (url, error) in
+//            guard let url = url, let self = self else { return }
+//            avAsset = AVURLAsset(url: url)
+//            
+//            let duration = try await avAsset?.load(.duration)
+//            
+//            let time = CMTime(value: 3, timescale: 1)
+//            
+//            avAsset?.generateThumbnail(time: time, completion: { image in
+//                DispatchQueue.main.async {
+//                    self.ivTest.image = image
+//                }
+//            })
+//        })
+//    }
 }
 
 extension ViewController: PHPickerViewControllerDelegate {
+
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
         
-//        if let itemProvider = results.first?.itemProvider, itemProvider.canLoadObject(ofClass: UIImage.self) {
-//            let previousImage = ivTest.image
-//            itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
-//                DispatchQueue.main.async {
-//                    guard let self = self, let image = image as? UIImage, self.ivTest.image == previousImage else { return }
-//                    self.ivTest.image = image
-//                }
-//            }
-//        }
         guard let itemProvider = results.first?.itemProvider, let typeIdentifier = itemProvider.registeredTypeIdentifiers.first else { return }
         
         if itemProvider.hasItemConformingToTypeIdentifier(typeIdentifier) {
             itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier, completionHandler: { [weak self] (url, error) in
                 guard let url = url, let self = self else { return }
-                avAsset = AVURLAsset(url: url)
-                
-//                avAsset
-                let imageGenerator = AVAssetImageGenerator(asset: avAsset!)
-                imageGenerator.appliesPreferredTrackTransform = true
-                imageGenerator.requestedTimeToleranceBefore = .zero
-                imageGenerator.requestedTimeToleranceAfter = .zero
-                // 썸네일을 얻고 싶은 시간 설정 (여기서는 첫 번째 프레임)
-                let time = CMTime(value: 3, timescale: 1)
 
-                do {
-                    // 썸네일 이미지 얻기
-                    print(time)
-                    let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+                self.avAsset = AVURLAsset(url: url)
 
-
-                    // CGImage를 UIImage로 변환
-                    let thumbnail = UIImage(cgImage: cgImage)
-                    
-                    // 완료 클로저 호출
-                    // return thumbnail.rotateImageIfNeeded()
-                    DispatchQueue.main.async {
-                        self.ivTest.image = thumbnail
+                Task {
+                    do {
+                        var duration: CMTime? {
+                            didSet {
+                                print(duration)
+                                print("task end")
+                            }
+                        }
+                        duration = try await self.avAsset?.load(.duration)
+                        
+                    } catch {
+                        print(error)
+                        if let avError = error as? AVError {
+                            print(avError)
+                        }
                     }
-                    
-                } catch {
-                    
                 }
                 
-//                Task {
-//                    let duration = try await self.avAsset?.load(.duration)
-//                    print(duration)
-//                }
+                let time = CMTime(value: 3, timescale: 1)
+                
+                avAsset?.generateThumbnail(time: time, completion: { image in
+                    DispatchQueue.main.async {
+                        self.ivTest.image = image
+                    }
+                })
+                
+                print("Closure End")
             })
         }
         
     }
 }
-
