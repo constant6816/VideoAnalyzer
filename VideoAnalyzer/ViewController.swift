@@ -13,11 +13,24 @@ import Combine
 class ViewController: UIViewController {
     
     @IBOutlet weak var ivTest: UIImageView!
+    @IBOutlet weak var cvFrame: UICollectionView!
     private var avAsset: AVURLAsset?
+    private var duration: CMTime? {
+        didSet {
+            guard let duration = duration else { return }
+            DispatchQueue.main.async { [weak self] in
+                self?.cvFrame.dataSource = self
+                self?.cvFrame.reloadData()
+                self?.cvFrame.scrollToItem(at: IndexPath(row: 0, section: 0), at: .centeredHorizontally, animated: false)
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        cvFrame.delegate = self
+        cvFrame.register(UINib(nibName: String(describing: FrameCollectionViewCell.self), bundle: nil), forCellWithReuseIdentifier: String(describing: FrameCollectionViewCell.self))
+        cvFrame.contentInset = .init(top: 0, left: cvFrame.bounds.width/2, bottom: 0, right: cvFrame.bounds.width/2)
     }
     
     @IBAction func onClickAddVideo(_ sender: Any) {
@@ -27,23 +40,6 @@ class ViewController: UIViewController {
         pickerViewController.delegate = self
         present(pickerViewController, animated: true, completion: nil)
     }
-    
-//    private func importVideo(itemProvider: NSItemProvider, typeIdentifier: String) async {
-//        itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier, completionHandler: { [weak self] (url, error) in
-//            guard let url = url, let self = self else { return }
-//            avAsset = AVURLAsset(url: url)
-//            
-//            let duration = try await avAsset?.load(.duration)
-//            
-//            let time = CMTime(value: 3, timescale: 1)
-//            
-//            avAsset?.generateThumbnail(time: time, completion: { image in
-//                DispatchQueue.main.async {
-//                    self.ivTest.image = image
-//                }
-//            })
-//        })
-//    }
 }
 
 extension ViewController: PHPickerViewControllerDelegate {
@@ -56,38 +52,37 @@ extension ViewController: PHPickerViewControllerDelegate {
         if itemProvider.hasItemConformingToTypeIdentifier(typeIdentifier) {
             itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier, completionHandler: { [weak self] (url, error) in
                 guard let url = url, let self = self else { return }
-
                 self.avAsset = AVURLAsset(url: url)
-
                 Task {
-                    do {
-                        var duration: CMTime? {
-                            didSet {
-                                print(duration)
-                                print("task end")
-                            }
-                        }
-                        duration = try await self.avAsset?.load(.duration)
-                        
-                    } catch {
-                        print(error)
-                        if let avError = error as? AVError {
-                            print(avError)
-                        }
-                    }
+                    self.duration = try await self.avAsset?.load(.duration)
                 }
                 
                 let time = CMTime(value: 3, timescale: 1)
                 
-                avAsset?.generateThumbnail(time: time, completion: { image in
+                self.avAsset?.generateThumbnail(time: time, completion: { image in
                     DispatchQueue.main.async {
                         self.ivTest.image = image
                     }
                 })
-                
-                print("Closure End")
             })
         }
         
+    }
+}
+
+extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return Int(CMTimeGetSeconds(duration!)*10)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell: FrameCollectionViewCell
+        if let reusableCell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: FrameCollectionViewCell.self), for: indexPath) as? FrameCollectionViewCell {
+            cell = reusableCell
+        } else {
+            let objectArray = Bundle.main.loadNibNamed(String(describing: FrameCollectionViewCell.self), owner: nil, options: nil)
+            cell = objectArray![0] as! FrameCollectionViewCell
+        }
+        return cell
     }
 }
