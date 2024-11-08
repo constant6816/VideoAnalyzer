@@ -85,4 +85,20 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource, 
         }
         return cell
     }
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        return CGSize(width: <#T##CGFloat#>, height: <#T##CGFloat#>)
+//    }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard let collectionView = scrollView as? UICollectionView else { return }
+        
+        let centerPoint = CGPoint(x: collectionView.bounds.midX, y: collectionView.bounds.midY)
+        if let indexPath = collectionView.indexPathForItem(at: centerPoint) {
+            print("\(indexPath.row)")
+            self.avAsset?.generateThumbnail(time: CMTimeMultiplyByRatio(duration!, multiplier: Int32(indexPath.row), divisor: Int32(Int(CMTimeGetSeconds(duration!)*10))), completion: { image in
+                DispatchQueue.main.async {
+                    self.ivTest.image = image
+                }
+            })
+        }
+    }
 }

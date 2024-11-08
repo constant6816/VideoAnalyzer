@@ -18,7 +18,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KeH-Ek-9RF">
-                        <rect key="frame" x="0.0" y="0.0" width="3" height="50"/>
+                        <rect key="frame" x="3.6666666666666661" y="0.0" width="3" height="50"/>
                         <color key="backgroundColor" systemColor="secondaryLabelColor"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="3" id="Wby-Su-hjj"/>
@@ -27,7 +27,7 @@
                 </subviews>
                 <constraints>
                     <constraint firstAttribute="bottom" secondItem="KeH-Ek-9RF" secondAttribute="bottom" id="DQg-wK-Se1"/>
-                    <constraint firstItem="KeH-Ek-9RF" firstAttribute="leading" secondItem="qSh-0G-8zZ" secondAttribute="leading" id="P3k-Ih-4bG"/>
+                    <constraint firstItem="KeH-Ek-9RF" firstAttribute="centerX" secondItem="qSh-0G-8zZ" secondAttribute="centerX" id="JQj-rP-zqu"/>
                     <constraint firstItem="KeH-Ek-9RF" firstAttribute="top" secondItem="qSh-0G-8zZ" secondAttribute="top" id="nxn-KZ-467"/>
                 </constraints>
             </collectionViewCellContentView>
